@@ -1,0 +1,58 @@
+<html>
+    <head>
+        <!-- Necesario si usas Phoenix, lo bloquea por defecto al ser conexión segura --> 
+        <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+        <script src="https://d3js.org/d3.v5.min.js"></script>
+
+        <!-- Primer ejemplo: Manipulando elementos del DOM -->
+        <script type="text/javascript">
+
+            d3.json("provinces.json").then(function(data) {
+
+                console.log("data: ", data);
+
+            });
+
+            function draw(){ 
+                // Seleccion de nodo
+                d3.select("h1#headline").text("Mi primer título con D3");
+                d3.select("p#firstParagraph").text("Mi primer párrafo con D3");
+                d3.select("p#firstParagraph").style("color", function(){return "red";});
+                
+                // Seleccion de todos
+                d3.selectAll("p").attr("style", "color:red");
+                d3.selectAll("li").attr("class", "new_item");
+                
+                // Nuevos elementos
+                d3.select("body").append("p").text("Esto es un parrafo con D3.js");
+                d3.select("body").append("div").attr("id", "mydiv"). style("border", "1px black solid").text("Mi div");
+                
+                // Binding
+                d3.select("div#mydiv").style("background-color", "pink").on("click", function() {alert("You clicked!")})
+            }
+            </script>
+        <style>
+            .item {
+                color: aqua
+            }
+            .new_item {
+                color: darkblue
+            }
+        </style>
+    </head>
+    
+
+    <body onload="draw()">
+        <h1 id="headline"></h1>
+        <p id="firstParagraph"></p>
+        <p id="secondParagraph"></p>
+        
+        <p>Esto es un párrafo directamente en html</p>
+        <ul>
+            <li class="item">xxxxxxxx</li>
+            <li class="item">yyyyyyyy</li>
+            <li class="item">zzzzzzzz</li>
+            <li class="item">qqqqqqqq</li>
+        </ul>
+    </body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mapa de España con D3.js y TopoJSON</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="https://unpkg.com/topojson@3"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #F5F5F5;
+            font-family: "Arial", sans-serif;
+        }
+        h1 {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        path:hover {
+            fill: orange;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mapa de España</h1>
+    <div id="map"></div>
+
+    <script>
+        // Dimensiones del mapa
+        const width = 800;
+        const height = 600;
+
+        // Crear lienzo SVG
+        const svg = d3.select("#map")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        // Proyección geográfica para España
+        const projection = d3.geoMercator()
+            .center([-3, 40])
+            .scale(2000)
+            .translate([width / 2, height / 2]);
+
+        // Crear ruta (path) para dibujar las provincias
+        const path = d3.geoPath().projection(projection);
+
+        // Cargar datos TopoJSON de las provincias de España
+        d3.json("provinces.json").then(function(data) {
+
+            console.log("data: ", data);
+            // Convertir TopoJSON a GeoJSON
+            const geoData = topojson.feature(data, data.objects.autonomous_regions);
+
+            // Dibujar las provincias
+            svg.selectAll("path")
+                .data(geoData.features)
+                .enter()
+                .append("path")
+                .attr("d", path)
+                .style("fill", "red")
+                .style("stroke", "white")
+                .style("stroke-width", 0.5)
+                .on("mouseover", function(d) {
+                    d3.select(this).style("fill", "orange");
+                })
+                .on("mouseout", function(d) {
+                    d3.select(this).style("fill", "red");
+                });
+        });
+    </script>
+</body>
+</html>   
