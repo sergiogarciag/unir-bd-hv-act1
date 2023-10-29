@@ -2,24 +2,23 @@
 const width = 800;
 const height = 600;
 
-const zoom = d3.zoom()
-    .scaleExtent([1, 8])
-    .on("zoom", function (event) {
-        console.log("event: ", event);
-        const {transform} = event;
-        g.attr("transform", transform);
-        g.attr("stroke-width", 1 / transform.k);
-    });
-
 // Crear lienzo SVG
 const svg = d3.select("#map")
     .append("svg")
     .attr("width", width)
     .attr("height", height);
 
-const div = d3.select("body").append("div")
+const div = d3.select("#info")
+    .append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
+
+const body = d3.select("body");
+
+// Tooltip
+const tooltip = d3.select("body")
+  .append("div")
+  .attr("class","tooltip")
 
 // Proyección geográfica para España
 const projection = d3.geoMercator()
@@ -51,37 +50,7 @@ d3.json("provinces.json").then(function(data) {
         .style("stroke-width", 0.5)
         .on("click", (d, e) => {
             console.log("click: ", d, e);
-            pintarTooltip(d, e);
-
-            div.transition()
-            .duration(200)
-            .style("opacity", 0.9);
-
-            // dataInfo = filtrarPorProvincia(info, d.id);
-            dataInfo = info[d.id];
-            console.log("dataInfo: ", dataInfo);
-
-            textoHTML = "Resultados: <br/><b>" + d.properties.name + "</b><br/>";
-            if (dataInfo) {
-                textoHTML += "Nombre: " + dataInfo.nombre + "<br/>";
-                textoHTML += "Genero: " + dataInfo.ambos.descripcion + "<br/>";
-                textoHTML += "Año: 2022" + "<br/>";
-                textoHTML += "Tasa Actividad:  " + dataInfo.ambos[2022].actividad.T1 + " % <br/>";
-                textoHTML += "Tasa Empleo:  " + dataInfo.ambos[2022].empleo.T1 + " % <br/>"; 
-                textoHTML += "Tasa Paro:  " + dataInfo.ambos[2022].paro.T1 + " % <br/>";
-            }
-
-            div.html(textoHTML)
-            .style("left", (d3.event.pageX) + "px")
-            .style("top", (d3.event.pageY - 28) + "px");
-
-            // Obtener el contenedor HTML
-            const container = d3.select("#json-container");
-
-
-
-            // Llamar a la función recursiva para crear los elementos HTML
-            crearElementos(dataInfo, container);
+            mostrarInformacion(info, d);
         })
         .on("mouseover", function(d, e) {
             console.log("mouseover: ", d, e);
@@ -95,13 +64,6 @@ d3.json("provinces.json").then(function(data) {
             d3.select(this).style("fill", "red");
             borrarTooltip();
         });
-
-    svg.call(zoom);
-
-    // Colocamos
-    const tooltip = d3.select("body")
-      .append("div")
-      .attr("class","tooltip")
 
     function borrarTooltip(){
         console.log("borraTooltip");
@@ -126,6 +88,69 @@ d3.json("provinces.json").then(function(data) {
         //.transition()
         .style("opacity",1);  
     }
+
+    // Generar texto en formato HTML listo para mostrar
+    function generarTextoHTML (d, data) { 
+        textoHTML = "<h3>" + d.properties.name + "</h3>";
+        if (dataInfo) {
+            textoHTML += "Provincia: " + dataInfo.nombre + "<br/>";
+            textoHTML += "Genero: " + dataInfo.ambos.descripcion + "<br/><br/>";
+            textoHTML += "<b>Datos Históricos</b><br/>";
+            textoHTML += "<table>";
+            textoHTML += "<tr>";
+            textoHTML += "<th>Año</th>";
+            textoHTML += "<th>Tasa Actividad</th>";
+            textoHTML += "<th>Tasa Empleo</th>";
+            textoHTML += "<th>Tasa Empleo</th>";
+            textoHTML += "</tr>"
+            
+            // Bucle que va desde 2002 hasta 2023
+            for (let anio = 2002; anio <= 2023; anio++) {
+                console.log("Año:", anio);
+                textoHTML += "<tr>"
+                textoHTML += "<td>" + anio + "</td>";
+                textoHTML += "<td>" + dataInfo.ambos[anio].actividad.T3 + " % </td>";
+                textoHTML += "<td>" + dataInfo.ambos[anio].empleo.T3 + " % </td>"; 
+                textoHTML += "<td>" + dataInfo.ambos[anio].paro.T3 + " % </td>";
+                textoHTML += "</tr>"
+            }
+    
+            textoHTML += "</table>";
+        }
+        return textoHTML;
+    }
+
+    function mostrarInformacion (info, d) {
+            
+        // Recupera la información de la provincia seleccionada
+        dataInfo = info[d.id];
+        console.log("dataInfo: ", dataInfo);
+        textoHTML = generarTextoHTML(d, dataInfo)
+        
+        const bodyWidth = body.node().getBoundingClientRect().width;
+        
+        const left = bodyWidth - 400;
+        const top = 30;
+        
+        console.log("left: ", left);
+        
+        // Insertamos información provincia en formato HTML
+        div.html(textoHTML)
+           .style("top", (d3.event.pageY - 28) + "px")
+           .style("top", (top) + "px");
+        // .style("left", (d3.event.pageX) + "px")
+        // .style("left", (left) + "px");
+        
+        div.transition()
+           .duration(200)
+           .style("opacity", 0.9);
+
+        // // Obtener el contenedor HTML
+        // const container = d3.select("#json-container");
+        //
+        // // Llamar a la función recursiva para crear los elementos HTML
+        // crearElementos(dataInfo, container);
+    };
 
     // Función recursiva para crear elementos HTML para cada campo y valor del objeto JSON
     function crearElementos(objeto, contenedor) {

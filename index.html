@@ -36,13 +36,24 @@
             box-shadow: rgba(0, 0, 0, 0.5) 1px 1px 10px;
             color: #FFFFFF;
             border-radius: 4px;    
-            }
+        }
+        table {
+            border: 1px solid white;
+            border-collapse: collapse;
+            text-align: right;
+        }
+        th, td {
+            border: 1px solid white;
+            padding: 3px;
+            font-size: 0.8em;
+        }
     </style>
 </head>
 <body>
     <h1>Mapa de España</h1>
-    <div id="map"></div>
-    <div id="json-container"></div>
+        <div id="map"></div>
+        <div id="info"></div>
+        <div id="json-container"></div>
     <script src="mapa.js"></script>
 </body>
 </html>   
